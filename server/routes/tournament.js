@@ -1,10 +1,42 @@
 const express = require("express");
-const router = express.Router(); // ✅ REQUIRED
+const router = express.Router();
 
-const Tournament = require("../models/Tournament"); // ✅ REQUIRED
+const Tournament = require("../models/Tournament");
 const Team = require("../models/Team");
 
-// 🔥 JOIN TOURNAMENT WITH TEAM
+
+// ✅ CREATE TOURNAMENT
+router.post("/create", async (req, res) => {
+  try {
+    const tournament = new Tournament({
+      ...req.body,
+      teams: [] // initialize teams array
+    });
+
+    await tournament.save();
+
+    res.json({ message: "Tournament created" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Error creating tournament" });
+  }
+});
+
+
+// ✅ GET ALL TOURNAMENTS (IMPORTANT FIX)
+router.get("/", async (req, res) => {
+  try {
+    const tournaments = await Tournament.find();
+    res.json(tournaments);
+  } catch (err) {
+    console.error(err);
+    res.json([]);
+  }
+});
+
+
+// ✅ JOIN TOURNAMENT WITH TEAM
 router.post("/join", async (req, res) => {
   try {
     const { tournamentId, teamCode } = req.body;
@@ -51,4 +83,17 @@ router.post("/join", async (req, res) => {
   }
 });
 
-module.exports = router; // ✅ REQUIRED
+
+// ✅ DELETE TOURNAMENT
+router.delete("/delete/:id", async (req, res) => {
+  try {
+    await Tournament.findByIdAndDelete(req.params.id);
+    res.json({ message: "Tournament deleted" });
+  } catch (err) {
+    console.error(err);
+    res.json({ message: "Error deleting tournament" });
+  }
+});
+
+
+module.exports = router;
